@@ -2,12 +2,10 @@
 
 SerialLogHandler logHandler(LOG_LEVEL_TRACE);
 SYSTEM_THREAD(ENABLED);
-
+SYSTEM_MODE(SEMI_AUTOMATIC);
 
 SN3218_RK ledDriver;
 
-unsigned long lastTestMillis = 0;
-std::chrono::milliseconds testPeriod = 10s;
 
 bool i2cscan(TwoWire &wire);
 void runTest();
@@ -18,15 +16,13 @@ void setup() {
 
     ledDriver.begin();
     ledDriver.reset();
+    ledDriver.wake();
 
+    i2cscan(Wire);   
+    Particle.connect();
 }
 
 void loop() {
-    if (millis() - lastTestMillis >= testPeriod.count()) {
-        lastTestMillis = millis();
-        i2cscan(Wire);   
-        
-    }
     runTest();
 }
 
@@ -48,7 +44,7 @@ bool i2cscan(TwoWire &wire) {
 
 			switch(address) {
                 case 0x28: 
-                    // This is a Muon built-in peripheral
+                    deviceName = "STUSB4500 USB-C PD Controller";
                     break;
 
                 case 0x36:
@@ -65,7 +61,7 @@ bool i2cscan(TwoWire &wire) {
                     break;
 
                 case 0x61:
-                    // This is a Muon built-in peripheral
+                    deviceName = "KG200Z LoRaWAN radio";
                     break;
 
                 case 0x69:
@@ -97,35 +93,26 @@ bool i2cscan(TwoWire &wire) {
 }
 
 
-const uint8_t pwmLevels[2] = {128, 255};
-
 void runTest() {
-    static size_t pwmIndex = 0;
     static uint8_t channel = 0;
 
-    if (pwmIndex == 0 && channel == 0) {
-        Log.info("LED test starting");
-    }
-
-    uint8_t pwmLevel = pwmLevels[pwmIndex];
     if (channel == 0) {
+        Log.info("LED test starting");
         ledDriver.ledControl(0, 0); // Turn all off
     }
 
-    Log.trace("testing channel=%d pwmLevel=%d", channel, pwmLevel);
+    // Log.trace("testing channel=%d", channel);
+    ledDriver.setPWM(channel, 128);
     ledDriver.ledOn(channel);
     ledDriver.update();
-    delay(500);            
+    delay(1000);            
     ledDriver.ledOff(channel);
+    ledDriver.update();
 
     if (++channel >= 18) {
         channel = 0;
-        pwmIndex++;
-    }
-
-    if (pwmIndex >= sizeof(pwmLevels)) {
-        pwmIndex = 0;
         Log.info("LED test finished");
     }
+
     
 }

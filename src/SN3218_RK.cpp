@@ -73,28 +73,28 @@ bool SN3218_RK::ledControl(uint32_t andMask, uint32_t orMask) {
 
     uint8_t values[3];
     values[0] = currentLedState & 0x3f;
-    values[1] = (currentLedState >> 5) & 0x3f;
-    values[2] = (currentLedState >> 10) & 0x3f;
+    values[1] = (currentLedState >> 6) & 0x3f;
+    values[2] = (currentLedState >> 12) & 0x3f;
 
     return writeMultipleRegisters(REG_LED_CONTROL1, values, sizeof(values));
 }
 
 
 bool SN3218_RK::update() {
-    return writeRegister(REG_UPDATE, 0);
+    return writeRegister(REG_UPDATE, 0xff);
 }
 
 bool SN3218_RK::reset() {
     currentLedState = 0;
-    return writeRegister(REG_RESET, 0);
+    return writeRegister(REG_RESET, 0xff);
 }
 
 bool SN3218_RK::shutdown() {
-    return writeRegister(REG_SHUTDOWN, 0);
+    return writeRegister(REG_SHUTDOWN, 0x00);
 }
 
 bool SN3218_RK::wake() {
-    return writeRegister(REG_SHUTDOWN, 1);
+    return writeRegister(REG_SHUTDOWN, 0x01);
 }
 
 
@@ -107,7 +107,7 @@ bool SN3218_RK::writeMultipleRegisters(uint8_t reg, const uint8_t *values, size_
 
     wire.lock();
 
-    logSN3218.trace("i2cAddress=0x%02x reg=0x%02x numValues=%d value=%02x %02x %02x", (int)i2cAddress, (int)reg, (int)numValues, (int)((numValues >= 1) ? values[0] : 0), (int)((numValues >= 2) ? values[1] : 0), (int)((numValues >= 3) ? values[2] : 0) );
+    // logSN3218.trace("i2cAddress=0x%02x reg=0x%02x numValues=%d value=%02x %02x %02x", (int)i2cAddress, (int)reg, (int)numValues, (int)((numValues >= 1) ? values[0] : 0), (int)((numValues >= 2) ? values[1] : 0), (int)((numValues >= 3) ? values[2] : 0) );
 
     wire.beginTransmission(i2cAddress);
 

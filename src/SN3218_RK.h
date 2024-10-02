@@ -18,6 +18,11 @@
  * Because the chip does not support reading registers, the current LED on
  * and off state is stored as a class variable so you can easily change just
  * a single LED.
+ * 
+ * See the examples for additional information, however be sure:
+ * - You call begin(), reset(), and wakeup() at startup
+ * - You set the PWM value to a non-zero value for each channel, as it defaults to 0, which is off, even if the LED is turned on
+ * - Call update() after setting the PWM or using ledOn(), ledOff(), etc.
  */
 class SN3218_RK {
 public:
@@ -139,6 +144,8 @@ public:
      * @brief Wake the device from shutdown mode and resume normal operation
      * 
      * @return true if the I2C operation succeeded
+     * 
+     * This is required at boot to enable the outputs as the default is off!
      */
     bool wake();
 
