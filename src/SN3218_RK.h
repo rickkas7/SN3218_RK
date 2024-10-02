@@ -30,6 +30,14 @@ public:
     SN3218_RK(uint8_t i2cAddress = DEFAULT_I2C_ADDRESS);
 
     /**
+     * @brief Begin I2C operation
+     * 
+     * This just calls Wire.begin(), but is provided as a reminder that you need to 
+     * do that.
+     */
+    void begin();
+
+    /**
      * @brief Set the PWM value for a given channel
      * 
      * @param channel 0 - 17 (note: this is zero-based not OUT1 - OUT18!)
@@ -167,13 +175,14 @@ public:
     static const uint8_t REG_UPDATE = 0x16; //!< Update the outputs to match the registers
     static const uint8_t REG_RESET = 0x17; //!< Software reset the chip
 
-    static const uint8_t DEFAULT_I2C_ADDRESS = 0x24; //!< 0b1010100 (this might actually be 0x54)
+    static const uint8_t DEFAULT_I2C_ADDRESS = 0x54; //!< 0b1010100
 
     static const uint8_t CHANNEL_LAST = 17; //!< 0-based! Used for bounds checking channel values
 
 protected:
     uint8_t i2cAddress = DEFAULT_I2C_ADDRESS; //!< I2C address for the chip
     uint32_t currentLedState = 0; //!< Current LED on/off states
+    TwoWire &wire = Wire; //!< I2C port to use
 };
 
 #endif // __SN3218_RK_H
